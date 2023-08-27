@@ -97,7 +97,6 @@ const submitForm = (formEl: FormInstance | undefined) => {
   if (!formEl) return;
   formEl.validate((valid) => {
     if (valid) {
-      console.log("submit!");
       usersStore.loginAction(ruleForm).then((res)=>{
         if(res.data.errcode===0){
           usersStore.updateToToken(res.data.token)
@@ -109,7 +108,6 @@ const submitForm = (formEl: FormInstance | undefined) => {
       })
 
     } else {
-      console.log("error submit!");
       return false;
     }
   });
