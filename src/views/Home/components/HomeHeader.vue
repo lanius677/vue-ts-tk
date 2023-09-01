@@ -13,8 +13,10 @@
     <!-- 右侧 提示消息 个人中心  -->
     <div>
       <el-dropdown>
-        <el-icon class="home-header-bell"><Bell /></el-icon>
-        <template #dropdown> 
+        <el-badge :value="12" class="home-header-bell">
+          <el-icon class=""><Bell /></el-icon>
+        </el-badge>
+        <template #dropdown>
           <el-dropdown-menu>
             <el-dropdown-item>暂无消息</el-dropdown-item>
             <el-dropdown-item>Action 2</el-dropdown-item>
@@ -23,28 +25,46 @@
       </el-dropdown>
 
       <el-dropdown>
-        <el-badge :value="12" class="home-header-badge">
-
-          <el-space>
-            <el-avatar
-            src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png"
-          /> 
-          <span>XXX</span>
-          </el-space>
-        </el-badge>
+        <el-space>
+          <el-avatar
+            :src="(head as string)"
+          />
+          <span>{{name}}</span>
+        </el-space>
         <template #dropdown>
           <el-dropdown-menu>
             <el-dropdown-item>个人中心</el-dropdown-item>
-            <el-dropdown-item>退出登录</el-dropdown-item>
+            <el-dropdown-item @click="handleLogout()">退出登录</el-dropdown-item>
           </el-dropdown-menu>
         </template>
       </el-dropdown>
-
     </div>
   </div>
 </template>
 
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import {useUsersStore} from '@/stores/users';
+import { storeToRefs } from 'pinia';
+import { computed } from 'vue';
+
+const usersStore=useUsersStore()
+const {userInfos}=storeToRefs(usersStore)
+
+// console.log(userInfos.value)
+
+// 从store中获取头像
+const head=computed(()=>userInfos.value.head)
+const name=computed(()=>userInfos.value.name)
+
+// 退出
+const handleLogout=()=>{
+  usersStore.clearToken();
+  setTimeout(()=>{
+    window.location.replace('/login')
+  },1000)
+}
+
+</script>
 
 <style scoped lang="scss">
 @import "../Home.module.scss";
@@ -55,4 +75,6 @@
   display: flex;
   align-items: center;
 }
+
+
 </style>

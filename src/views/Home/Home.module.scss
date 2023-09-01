@@ -1,4 +1,5 @@
 // Home.module.scss
+
 .home-header{
   display: flex;
   align-items: center;
@@ -30,12 +31,11 @@
     margin-right: auto;
   }
   &-bell{
-    display: flex;
+    margin-right: 20px;
     padding-top: 10px;
     align-items: center;
     justify-content: center;
-    padding-right: 10px;
-    font-size: 20px
+    font-size: 20px;
   }
 
 }
@@ -45,5 +45,14 @@
   background-color: #fff;
   flex-grow: 1;
   position: relative;
+
+}
+
+.home-breadcrumb{
+  background: #fff;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  padding: 0 30px;
 
 }

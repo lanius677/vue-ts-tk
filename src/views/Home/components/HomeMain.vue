@@ -1,6 +1,6 @@
 <template>
-  <div>
-    HomeMaon
+  <div class="home-main">
+    <router-view></router-view>
   </div>
 </template>
 
@@ -8,6 +8,6 @@
 
 </script>
 
-<style scoped>
-
+<style scoped lang="scss">
+@import "@/views/Home/Home.module.scss";
 </style>
