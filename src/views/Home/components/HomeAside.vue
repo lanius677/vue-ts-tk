@@ -1,6 +1,6 @@
 <template>
   <div>
-    <el-menu default-active="1-1" router>
+    <el-menu :default-active="route.path" router>
       <el-sub-menu v-for="item in menus" :index="item.path" :key="item.path">
         <template #title>
           <el-icon>
@@ -24,12 +24,13 @@
 </template>
 
 <script setup lang="ts">
-import { useRouter, type RouteRecordName } from "vue-router";
+import { useRouter, type RouteRecordName, useRoute } from "vue-router";
 import _ from "lodash";
 import { useUsersStore } from "@/stores/users";
 import { storeToRefs } from "pinia";
 
 const router = useRouter();
+const route = useRoute();
 // console.log(router);
 // 使用cloneDeep深拷贝对路由表操作，避免互相引用的问题
 
@@ -43,8 +44,10 @@ const menus = _.cloneDeep(router.options.routes).filter((v) => {
   v.children = v.children?.filter((v)=>v.meta?.menu && (permission as (RouteRecordName | undefined)[]).includes(v.name))
   return v.meta?.menu && (permission as (RouteRecordName | undefined)[]).includes(v.name);
 });
+// console.log(menus);
 
 </script>
+
 
 <style scoped lang="scss">
 .el-menu {
