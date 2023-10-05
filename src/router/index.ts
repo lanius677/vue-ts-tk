@@ -2,6 +2,7 @@ import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
 import { useUsersStore } from '@/stores/users';
 import { storeToRefs } from 'pinia';
 import _ from 'lodash';
+import { useSignsStore } from '@/stores/signs';
 
 declare module 'vue-router' {
   interface RouteMeta {
@@ -45,6 +46,26 @@ const routes: Array<RouteRecordRaw> = [
           icon: 'Calendar',
           auth: true
         },
+        // 签到页获取 路由守卫 
+        beforeEnter: (to, from, next) => {
+          const usersStore = useUsersStore()
+          const { userInfos } = storeToRefs(usersStore)
+          const signsStore = useSignsStore()
+          const { signsInfos } = storeToRefs(signsStore)
+
+          // console.log('userInfos',userInfos.value._id)
+
+          if (_.isEmpty(signsInfos.value)) {
+            signsStore.getTime({ userid: userInfos.value._id }).then((res) => {
+              // console.log('res',res.data);
+              if(res.data.errcode===0){
+                signsStore.updateInfos(res.data.infos)
+              }
+            })
+          } else {
+            next()
+          }
+        }
       },
       {
         path: 'exception',
@@ -100,7 +121,7 @@ router.beforeEach((to, from, next) => {
   const store = useUsersStore()
   const { token, userInfos } = storeToRefs(store)
   // 判断是否有权限和用户信息
-  console.log('userInfos',store.userInfos)
+  // console.log('userInfos',store.userInfos)
   if (to.meta.auth && _.isEmpty(userInfos.value)) {
 
     if (token.value) {
@@ -109,11 +130,13 @@ router.beforeEach((to, from, next) => {
         if (res.data.errcode === 0) {
           store.updateUserInfos(res.data.infos)
           next()
+          console.log(11111);
+
         }
       })
 
       // 如果token没有，跳转到登录页
-    } else {  
+    } else {
       next('/login')
     }
 
