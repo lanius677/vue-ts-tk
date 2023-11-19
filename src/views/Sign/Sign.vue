@@ -4,7 +4,7 @@
     <el-descriptions border direction="vertical" :column="9">
       <el-descriptions-item label="月份">{{ month }}月</el-descriptions-item>
       <el-descriptions-item v-for="(value, key) in DetailKey" :key="key" :label="value">{{
-        dateilValue[key]
+        detailValue[key]
       }}</el-descriptions-item>
       <el-descriptions-item label="操作">
         <el-button type="primary" plain size="small" @click="handleToException()"
@@ -25,7 +25,7 @@
           <el-select v-model="month" @change="handleChange">
             <el-option
               v-for="item in 12"
-              :key="item"
+              :key="item"  
               :value="item"
               :label="item + '月'"
             ></el-option>
@@ -43,8 +43,9 @@
 <script setup lang="ts">
 import { useSignsStore } from "@/stores/signs";
 import { useUsersStore } from "@/stores/users";
+import { toZero } from "@/utils/common";
 import { ElMessage } from "element-plus";
-import { computed, reactive, ref } from "vue";
+import { computed, reactive, ref, watchEffect } from "vue";
 import { useRouter } from "vue-router";
 
 // 响应式打卡信息
@@ -57,7 +58,7 @@ enum DetailKey {
   lateAndEarly = "迟到并早退",
 }
 
-const dateilValue = reactive({
+const detailValue = reactive({
   normal: 1,
   absent: 0,
   miss: 3,
@@ -88,6 +89,60 @@ const date = ref(new Date());
 const year = date.value.getFullYear();
 const month = ref(date.value.getMonth() + 1);
 
+watchEffect((reset) => {
+  // console.log(toZero(month.value));
+  const detailMonth = (signsInfos.value.detail as { [index: string]: unknown })[
+    toZero(month.value)
+  ] as { [index: string]: unknown };
+  //  console.log(detailMonth);
+
+  for (let attr in detailMonth) {
+    // console.log(detailMonth[attr]);
+    switch (detailMonth[attr]) {
+      case DetailKey.normal:
+        detailValue.normal++;
+        break;
+
+      case DetailKey.absent:
+        detailValue.absent++;
+        break;
+
+      case DetailKey.miss:
+        detailValue.miss++;
+        break;
+
+      case DetailKey.late:
+        detailValue.late++;
+        break;
+
+      case DetailKey.early:
+        detailValue.early++;
+        break;
+
+      case DetailKey.lateAndEarly:
+        detailValue.lateAndEarly++;
+        break;
+    }
+  }
+
+  for (let attr in detailValue) {
+    if (attr !== "normal" && detailValue[attr as keyof typeof detailValue] !== 0) {
+      detailState.type = "danger";
+      detailState.text = "异常";
+    }
+  }
+
+  // 对月份数值清除副作用
+  reset(() => {
+    detailState.type = "success";
+    detailState.text = "正常";
+
+    for (let attr in detailValue) {
+      detailValue[attr as keyof typeof detailValue] = 0;
+    }
+  });
+});
+
 // 查看不同日期
 const handleChange = () => {
   // console.log(month.value);
@@ -97,7 +152,11 @@ const handleChange = () => {
 // 查看打卡详情
 const router = useRouter();
 const handleToException = () => {
-  router.push("/exception");
+  // router.push("/exception");
+  router.push({
+    path:'/exception',
+    query:{month:month.value}
+  })
 };
 
 // 签到日期渲染方法
@@ -120,18 +179,17 @@ const renderTime = ({ day }: dayObject) => {
 };
 
 // 打卡签到事件
-const handlePutTime=()=>{
-  signsStore.putTime({userid:usersInfos.value._id}).then((res)=>{
-    console.log('res',res);
-    if(res.data.errcode===0){
-      signsStore.updateInfos(res.data.infos)
-      ElMessage.success('签到成功')
+const handlePutTime = () => {
+  signsStore.putTime({ userid: usersInfos.value._id }).then((res) => {
+    console.log("res", res);
+    if (res.data.errcode === 0) {
+      signsStore.updateInfos(res.data.infos);
+      ElMessage.success("签到成功");
     }
-  })
-}
+  });
+};
 </script>
 
 <style scoped lang="scss">
 @import "./Sign.module.scss";
-
 </style>

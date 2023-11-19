@@ -58,7 +58,7 @@ const routes: Array<RouteRecordRaw> = [
           if (_.isEmpty(signsInfos.value)) {
             signsStore.getTime({ userid: userInfos.value._id }).then((res) => {
               // console.log('res',res.data);
-              if(res.data.errcode===0){
+              if (res.data.errcode === 0) {
                 signsStore.updateInfos(res.data.infos)
               }
             })
@@ -77,6 +77,25 @@ const routes: Array<RouteRecordRaw> = [
           icon: 'warning',
           auth: true
         },
+        beforeEnter: (to, from, next) => {
+          const usersStore = useUsersStore()
+          const { userInfos } = storeToRefs(usersStore)
+          const signsStore = useSignsStore()
+          const { signsInfos } = storeToRefs(signsStore)
+
+          // console.log('userInfos',userInfos.value._id)
+
+          if (_.isEmpty(signsInfos.value)) {
+            signsStore.getTime({ userid: userInfos.value._id }).then((res) => {
+              // console.log('res',res.data);
+              if (res.data.errcode === 0) {
+                signsStore.updateInfos(res.data.infos)
+              }
+            })
+          } else {
+            next()
+          }
+        }
       },
       {
         path: 'apply',
